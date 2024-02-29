@@ -1,6 +1,6 @@
 pub trait Generator {
     type Item;
-    type Iterator: Iterator<Item = Self::Item> + Send;
+    type Iterator: Iterator<Item = Self::Item>;
 
-    fn iter(&self) -> Self::Iterator;
+    fn into_iter(self) -> Self::Iterator;
 }

@@ -8,7 +8,7 @@ pub struct GeneratorFuncIterator<IterFunc> {
     iterfunc: IterFunc,
 }
 
-impl<Value, IterFunc: FnMut() -> Option<Value>, SetupFunc: Fn() -> IterFunc>
+impl<Value, IterFunc: FnMut() -> Option<Value>, SetupFunc: FnOnce() -> IterFunc>
     GeneratorFunc<SetupFunc>
 {
     pub fn new(setup: SetupFunc) -> Self {
@@ -16,13 +16,13 @@ impl<Value, IterFunc: FnMut() -> Option<Value>, SetupFunc: Fn() -> IterFunc>
     }
 }
 
-impl<Value, IterFunc: Send + FnMut() -> Option<Value>> GeneratorFuncIterator<IterFunc> {
+impl<Value, IterFunc: FnMut() -> Option<Value>> GeneratorFuncIterator<IterFunc> {
     fn new(iterfunc: IterFunc) -> Self {
         Self { iterfunc }
     }
 }
 
-impl<Value, IterFunc: Send + FnMut() -> Option<Value>> std::iter::Iterator
+impl<Value, IterFunc: FnMut() -> Option<Value>> std::iter::Iterator
     for GeneratorFuncIterator<IterFunc>
 {
     type Item = Value;
@@ -32,13 +32,13 @@ impl<Value, IterFunc: Send + FnMut() -> Option<Value>> std::iter::Iterator
     }
 }
 
-impl<Value, IterFunc: Send + FnMut() -> Option<Value>, SetupFunc: Fn() -> IterFunc> Generator
+impl<Value, IterFunc: FnMut() -> Option<Value>, SetupFunc: FnOnce() -> IterFunc> Generator
     for GeneratorFunc<SetupFunc>
 {
     type Iterator = GeneratorFuncIterator<IterFunc>;
     type Item = Value;
 
-    fn iter(&self) -> Self::Iterator {
+    fn into_iter(self) -> Self::Iterator {
         GeneratorFuncIterator::new((self.setup)())
     }
 }
